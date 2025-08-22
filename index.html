@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Healthcare Awareness & Education – Rwanda</title>
+  <meta name="description" content="One‑file healthcare awareness & education PWA: facility finder, campaigns calendar, learning modules, appointments, lightweight telehealth and offline support." />
+  <link rel="icon" href="#"/>
+  <style>
+    :root {
+      --bg: #0b0e12;
+      --panel: #11151b;
+      --panel-2: #0d1117;
+      --text: #e6eef8;
+      --muted: #9fb1c9;
+      --brand: #1dd1a1;
+      --brand-2: #00cc88;
+      --accent: #4dabf7;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --ok: #51cf66;
+      --ring: 0 0 0 2px rgba(29,209,161,.35);
+      --radius: 16px;
+      --transition: all 0.3s ease;
+    }
+    
+    [data-theme="light"] {
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --panel-2: #f1f5f9;
+      --text: #111827;
+      --muted: #6b7280;
+      --ring: 0 0 0 2px rgba(29,209,161,.2);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Ubuntu, sans-serif;
+      line-height: 1.6;
+      transition: var(--transition);
+    }
+    
+    body {
+      background: linear-gradient(180deg, var(--bg), #05070a);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+    }
+    
+    [data-theme="light"] body {
+      background: linear-gradient(180deg, var(--bg), #e2e8f0);
+    }
+    
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+    
+    /* Header & Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(11,14,18,.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #1c212b;
+    }
+    
+    [data-theme="light"] header {
+      background: rgba(247,250,252,.8);
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: conic-gradient(from 45deg, var(--brand), var(--accent), var(--brand));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 30px rgba(0,204,136,.25);
+    }
+    
+    .logo svg {
+      width: 22px;
+      height: 22px;
+      fill: #001b12;
+    }
+    
+    .title {
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    
+    .muted {
+      color: var(--muted);
+    }
+    
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px;
+    }
+    
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .lang-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #0c131a;
+      border: 1px solid #1b2430;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .lang-toggle {
+      background: #f1f5f9;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .lang-toggle:hover {
+      border-color: #2a3342;
+      box-shadow: var(--ring);
+    }
+    
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 26px;
+      display: inline-block;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #1a2330;
+      border: 1px solid #2a3342;
+      border-radius: 999px;
+      transition: .2s;
+    }
+    
+    [data-theme="light"] .slider {
+      background: #e5e7eb;
+      border: 1px solid #d1d5db;
+    }
+    
+    .slider:before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 18px;
+      height: 18px;
+      background: #e6eef8;
+      border-radius: 999px;
+      transition: .2s;
+    }
+    
+    input:checked + .slider {
+      background: linear-gradient(180deg, #1dd1a1, #00b894);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #1b2430;
+      background: linear-gradient(180deg, #0f1420, #0a0f18);
+      padding: 10px 14px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .btn {
+      border: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    }
+    
+    .btn:hover {
+      border-color: #2a3342;
+      box-shadow: var(--ring);
+    }
+    
+    [data-theme="light"] .btn:hover {
+      border-color: #d1d5db;
+    }
+    
+    .btn.primary {
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      color: #001912;
+      border-color: transparent;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid #1b2430;
+    }
+    
+    [data-theme="light"] .tabs {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .tab {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid #223045;
+      background: #0a1117;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .tab {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+    }
+    
+    .tab.active {
+      background: linear-gradient(180deg, #0f1726, #0b111c);
+      border-color: #2a3342;
+      box-shadow: inset 0 0 0 1px #2a3342;
+    }
+    
+    [data-theme="light"] .tab.active {
+      background: linear-gradient(180deg, #e0f2fe, #bae6fd);
+      border-color: #93c5fd;
+      box-shadow: inset 0 0 0 1px #93c5fd;
+    }
+    
+    /* Main Content */
+    main {
+      padding: 24px;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    
+    .card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid #1b2430;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .card {
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 6px rgba(0,0,0,.05);
+    }
+    
+    @media (min-width:860px) {
+      .sm6 { grid-column: span 6; }
+      .sm4 { grid-column: span 4; }
+      .sm8 { grid-column: span 8; }
+    }
+    
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    
+    /* Form Elements */
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #243145;
+      background: #0a1117;
+      color: var(--text);
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] input,
+    [data-theme="light"] select,
+    [data-theme="light"] textarea {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: #111827;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      box-shadow: var(--ring);
+      border-color: #2b394a;
+    }
+    
+    [data-theme="light"] input:focus,
+    [data-theme="light"] select:focus,
+    [data-theme="light"] textarea:focus {
+      border-color: #93c5fd;
+    }
+    
+    label {
+      display: block;
+      font-size: 13px;
+      margin: 6px 0;
+      color: var(--muted);
+    }
+    
+    /* Lists & Items */
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+    
+    .item {
+      padding: 12px;
+      border: 1px solid #223045;
+      border-radius: 14px;
+      background: #0a1117;
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .item {
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+    }
+    
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    
+    .kpi .item {
+      display: grid;
+      gap: 4px;
+    }
+    
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .chip {
+      border: 1px solid #223045;
+      background: #0b141c;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      transition: var(--transition);
+    }
+    
+    [data-theme="light"] .chip {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+    }
+    
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+    }
+    
+    tbody tr {
+      background: #0b131a;
+      border: 1px solid #1b2430;
+    }
+    
+    [data-theme="light"] tbody tr {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .right {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .sr {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    /* Footer */
+    .footer {
+      padding: 20px;
+      color: #7d8ca3;
+      font-size: 13px;
+      text-align: center;
+    }
+    
+    [data-theme="light"] .footer {
+      color: #6b7280;
+    }
+    
+    /* Tags & Status */
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border: 1px solid #294055;
+      border-radius: 999px;
+    }
+    
+    [data-theme="light"] .tag {
+      border: 1px solid #d1d5db;
+    }
+    
+    .danger { color: #ff8787; }
+    .ok { color: #69db7c; }
+    .warn { color: #ffd166; }
+    
+    .empty {
+      padding: 20px;
+      border: 1px dashed #294055;
+      border-radius: 14px;
+      color: #9fb1c9;
+      text-align: center;
+    }
+    
+    [data-theme="light"] .empty {
+      border: 1px dashed #d1d5db;
+      color: #6b7280;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .toast {
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid #2a3342;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+    }
+    
+    [data-theme="light"] .toast {
+      border: 1px solid #e5e7eb;
+    }
+    
+    .toast.success {
+      border-left: 4px solid var(--ok);
+    }
+    
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+    
+    .toast.info {
+      border-left: 4px solid var(--accent);
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* PWA Install Prompt */
+    .pwa-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid #2a3342;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    [data-theme="light"] .pwa-prompt {
+      border: 1px solid #e5e7eb;
+    }
+    
+    .pwa-prompt .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    
+    /* Offline indicator */
+    .offline-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: var(--danger);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <!-- Toast container for notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- Offline indicator -->
+  <div class="offline-indicator" id="offlineIndicator">Offline</div>
+  
+  <!-- PWA Install Prompt -->
+  <div class="pwa-prompt" id="pwaPrompt" hidden>
+    <p>Install Rwanda Health Hub for a better experience?</p>
+    <div class="actions">
+      <button class="btn" id="pwaDismiss">Not now</button>
+      <button class="btn primary" id="pwaInstall">Install</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="row container">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><path d="M3 9h6V3h2v6h6v2h-6v6H9v-6H3z"/></svg>
+        </div>
+        <div>
+          <div class="title">Rwanda Health Hub</div>
+          <div class="muted" id="subtitle">Awareness • Education • Access</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="lang-toggle" id="langToggle" title="Kinyarwanda / English">
+          <span id="langFlag">🇷</span>
+          <strong id="langText">RW/EN</strong>
+        </div>
+        <label class="switch" title="Light/Dark">
+          <input id="themeToggle" type="checkbox" aria-label="Toggle theme">
+          <span class="slider"></span>
+        </label>
+        <button id="installBtn" class="btn" hidden> Install App</button>
+        <button id="notifyBtn" class="btn"> Notifications</button>
+      </div>
+    </div>
+    <nav class="tabs container" role="tablist" aria-label="Sections">
+      <button class="tab active" data-tab="home"> <span data-i18n="home">Home</span></button>
+      <button class="tab" data-tab="services"> <span data-i18n="services">Services</span></button>
+      <button class="tab" data-tab="campaigns"> <span data-i18n="campaigns">Campaigns</span></button>
+      <button class="tab" data-tab="education"> <span data-i18n="education">Education</span></button>
+      <button class="tab" data-tab="appointments"> <span data-i18n="appointments">Appointments</span></button>
+      <button class="tab" data-tab="telehealth"> <span data-i18n="telehealth">Telehealth</span></button>
+      <button class="tab" data-tab="dashboard"> <span data-i18n="dashboard">Dashboard</span></button>
+      <button class="tab" data-tab="admin"> <span data-i18n="admin">Admin</span></button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- HOME -->
+    <section class="grid" data-panel="home">
+      <div class="card sm8">
+        <h3> <span data-i18n="mission">Our mission</span></h3>
+        <p id="missionText">Provide trusted health information, highlight public health campaigns, map nearby services and make it easy to book care—online or offline.</p>
+        <div class="chips" aria-label="quick actions">
+          <button class="btn primary" onclick="selectTab('campaigns')"> <span data-i18n="see_campaigns">See campaigns</span></button>
+          <button class="btn" onclick="selectTab('services')"> <span data-i18n="find_services">Find services</span></button>
+          <button class="btn" onclick="selectTab('appointments')"> <span data-i18n="book_visit">Book a visit</span></button>
+        </div>
+      </div>
+      <div class="card sm4">
+        <h3> Quick links</h3>
+        <div class="list">
+          <div class="item"> <strong>Immunization</strong> — <span class="muted">Find schedules & clinics</span></div>
+          <div class="item"> <strong>NCD Clinics</strong> — <span class="muted">Hypertension, diabetes checks</span></div>
+          <div class="item"> <strong>HPV Screening</strong> — <span class="muted">Cervical cancer prevention</span></div>
+          <div class="item"> <strong>Mental Health</strong> — <span class="muted">Support & counseling</span></div>
+        </div>
+      </div>
+      <div class="card sm6">
+        <h3> <span data-i18n="search_facilities">Search facilities</span></h3>
+        <div class="grid">
+          <div class="sm6"><label>District</label><input id="qDistrict" placeholder="e.g., Gasabo"></div>
+          <div class="sm6"><label>Service</label><input id="qService" placeholder="e.g., Immunization"></div>
+          <div class="sm6"><button class="btn" onclick="searchFacilities()">Search</button></div>
+          <div class="sm6 right"><button class="btn" onclick="selectTab('services')">Open full map/list →</button></div>
+        </div>
+        <div id="searchResults" class="list" style="margin-top:10px"></div>
+      </div>
+      <div class="card sm6">
+        <h3> <span data-i18n="upcoming">Upcoming awareness</span></h3>
+        <div id="upcomingList" class="list"></div>
+      </div>
+    </section>
+</br>
+    <!-- SERVICES -->
+    <section class="grid" data-panel="services" hidden>
+      <div class="card sm8">
+        <h3> Facilities & services</h3>
+        <div class="grid">
+          <div class="sm4"><label>District</label><input id="fDistrict" placeholder="All"></div>
+          <div class="sm4"><label>Service</label><input id="fType" placeholder="e.g., Maternity"></div>
+          <div class="sm4"><label>Open now</label>
+            <select id="fOpen">
+              <option value="any">Any</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select></div>
+          <div class="sm4"><button class="btn" onclick="renderFacilities()">Filter</button></div>
+          <div class="sm4"><button class="btn" onclick="resetFacilities()">Reset</button></div>
+          <div class="sm4 right"><button class="btn" onclick="exportFacilities()"> Export CSV</button></div>
+        </div>
+        <div id="facilityList" class="list" style="margin-top:10px"></div>
+      </div>
+      <div class="card sm4">
+        <h3> Add a facility (local only)</h3>
+        <label>Name</label><input id="newName"/>
+        <label>District</label><input id="newDistrict"/>
+        <label>Services (comma)</label><input id="newServices" placeholder="Immunization,Maternity"/>
+        <label>Phone</label><input id="newPhone" placeholder="e.g., 078x..."/>
+        <button class="btn" onclick="addFacility()">Save</button>
+        <p class="muted" style="margin-top:8px">Saved to your browser only.</p>
+      </div>
+    </section>
+    </br>
+
+    <!-- CAMPAIGNS -->
+    <section class="grid" data-panel="campaigns" hidden>
+      <div class="card sm8">
+        <h3> Public health campaigns</h3>
+        <div class="grid">
+          <div class="sm6"><label>Title</label><input id="cTitle" placeholder="e.g., Breast Cancer Awareness"></div>
+          <div class="sm3"><label>Date</label><input id="cDate" type="date"></div>
+          <div class="sm3"><label>Category</label><input id="cCat" placeholder="NCD, Immunization"></div>
+          
+          <div class="sm6"><button class="btn" onclick="addCampaign()">Add campaign</button></div>
+          <div class="sm6 right"><button class="btn" onclick="importMoh()">↻ Import from MOH (JSON URL)</button></div>
+        </div>
+        <table aria-label="Campaigns table" style="margin-top:10px">
+          <thead><tr><th>When</th><th>Title</th><th>Category</th><th></th></tr></thead>
+          <tbody id="campaignRows"></tbody>
+        </table>
+        <div class="empty" id="campaignEmpty" hidden>No campaigns yet. Add one above.</div>
+      </div>
+      <div class="card sm4">
+        <h3> Reminders</h3>
+        <p class="muted">Enable notifications, then tap a bell next to a campaign to schedule a reminder.</p>
+        <div id="reminderList" class="list"></div>
+      </div>
+    </section>
+</br>
+
+    <!-- EDUCATION -->
+    <section class="grid" data-panel="education" hidden>
+      <div class="card sm6">
+        <h3> Learning modules</h3>
+        <div id="eduList" class="list"></div>
+      </div>
+      <div class="card sm6">
+        <h3> Quick quiz</h3>
+        <div id="quiz"></div>
+        <div style="margin-top:10px"><button class="btn" onclick="gradeQuiz()">Check answers</button> <span id="quizScore" class="tag"></span></div>
+      </div>
+    </section>
+</br>
+    <!-- APPOINTMENTS -->
+    <section class="grid" data-panel="appointments" hidden>
+      <div class="card sm8">
+        <h3> Book an appointment</h3>
+        <div class="grid">
+          <div class="sm6"><label>Full name</label><input id="aName"></div>
+          <div class="sm6"><label>Phone</label><input id="aPhone" placeholder="07…"></div>
+          <div class="sm6"><label>Facility</label><input id="aFacility" placeholder="Choose or type"></div>
+          <div class="sm3"><label>Date</label><input id="aDate" type="date"></div>
+          <div class="sm3"><label>Time</label><input id="aTime" type="time"></div>
+          
+          <div class="sm6"><button class="btn primary" onclick="saveAppointment()">Save</button></div>
+          <div class="sm6 right"><button class="btn" onclick="exportAppointments()"> Export CSV</button></div>
+        </div>
+        <h3 style="margin-top:18px"> Your bookings</h3>
+        <div id="apptList" class="list"></div>
+      </div>
+      <div class="card sm4">
+        <h3> Tips</h3>
+        <ul>
+          <li>Bring your ID and insurance details.</li>
+          <li>Arrive 10–15 minutes early.</li>
+          <li>If urgent, use emergency numbers for immediate help.</li>
+        </ul>
+      </div>
+    </section>
+</br>
+    <!-- TELEHEALTH -->
+    <section class="grid" data-panel="telehealth" hidden>
+      <div class="card sm6">
+        <h3> Video check‑in (local demo)</h3>
+        <p class="muted">This demo shows how camera access works locally. A full telemedicine call needs a secure server for signaling. For now, you can capture a short triage video note.</p>
+        <video id="preview" autoplay playsinline muted style="width:100%;border-radius:12px;border:1px solid #223045;background:#000"></video>
+        <div style="margin-top:8px" class="chips">
+          <button class="btn" onclick="startCamera()">Start camera</button>
+          <button class="btn" onclick="stopCamera()">Stop</button>
+          <button class="btn" onclick="captureFrame()"> Capture note</button>
+          <a id="capturedLink" class="btn" download hidden>Download snapshot</a>
+        </div>
+      </div>
+      <div class="card sm6">
+        <h3> Triage chat (offline capable)</h3>
+        <div id="chatBox" class="list" style="height:280px;overflow:auto"></div>
+        <div class="grid" style="margin-top:8px">
+          <div class="sm8"><input id="chatMsg" placeholder="Type symptom or question…"></div>
+          <div class="sm4"><button class="btn" onclick="sendChat()">Send</button></div>
+        </div>
+        <p class="muted" style="margin-top:6px">Messages stay on this device.</p>
+      </div>
+    </section>
+</br>
+    <!-- DASHBOARD -->
+    <section class="grid" data-panel="dashboard" hidden>
+      <div class="card sm4">
+        <h3> KPIs (sample)</h3>
+        <div class="kpi">
+          <div class="item"><div class="muted">Active campaigns</div><div id="kpiCampaigns" style="font-size:22px">0</div></div>
+          <div class="item"><div class="muted">Facilities</div><div id="kpiFacilities" style="font-size:22px">0</div></div>
+          <div class="item"><div class="muted">Appointments</div><div id="kpiAppts" style="font-size:22px">0</div></div>
+          <div class="item"><div class="muted">Reminders</div><div id="kpiReminders" style="font-size:22px">0</div></div>
+        </div>
+      </div>
+      <div class="card sm8">
+        <h3> Data inputs</h3>
+        <ul>
+          <li>Manual entries (this app)</li>
+          <li>CSV imports</li>
+          <li>Optional API: HMIS/NHIC (via Admin → Endpoints)</li>
+        </ul>
+        <div class="empty">Connect to official sources when available. Respect privacy and consent.</div>
+      </div>
+    </section>
+</br>
+    <!-- ADMIN -->
+    <section class="grid" data-panel="admin" hidden>
+      <div class="card sm6">
+        <h3> Endpoints (optional)</h3>
+        <label>MOH/NHIC JSON campaigns URL</label>
+        <input id="mohUrl" placeholder="https://…/campaigns.json">
+        <div class="chips" style="margin-top:8px">
+          <button class="btn" onclick="testFetch()">Test fetch</button>
+          <button class="btn" onclick="saveConfig()">Save</button>
+        </div>
+        <pre id="fetchLog" style="white-space:pre-wrap;background:#0a1117;border:1px solid #223045;border-radius:12px;padding:10px;margin-top:10px;max-height:200px;overflow:auto"></pre>
+      </div>
+      <div class="card sm6">
+        <h3> Data controls</h3>
+        <div class="chips">
+          <button class="btn" onclick="if(confirm('Clear local data?')){localStorage.clear();location.reload()}">Clear all local data</button>
+          <button class="btn" onclick="backupData()"> Backup JSON</button>
+          <label class="btn" for="restoreFile"> Restore JSON</label>
+          <input id="restoreFile" type="file" accept="application/json" class="sr" onchange="restoreData(event)">
+        </div>
+        <p class="muted">Demo</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">2025</div>
+
+<script>
+/********************
+ * Enhanced i18n (RW/EN)
+ ********************/ 
+const I18N = {
+  en: {
+    home: 'Home', services: 'Services', campaigns: 'Campaigns', education: 'Education', 
+    appointments: 'Appointments', telehealth: 'Telehealth', dashboard: 'Dashboard', 
+    admin: 'Admin', mission: 'Our mission', see_campaigns: 'See campaigns', 
+    find_services: 'Find services', book_visit: 'Book a visit', 
+    search_facilities: 'Search facilities', upcoming: 'Upcoming awareness',
+    mission_text: 'Provide trusted health information, highlight public health campaigns, map nearby services and make it easy to book care—online or offline.',
+    app_install: 'Install App',
+    notifications: 'Notifications',
+    lang_rw: 'Kinyarwanda',
+    lang_en: 'English'
+  },
+  rw: {
+    home: 'Ahabanza', services: 'Serivisi', campaigns: 'Ibikorwa byo gukangurira', 
+    education: 'Amasomo', appointments: 'Gahunda y\'inzindaro', telehealth: 'Telemedisinsi', 
+    dashboard: 'Ishusho rusange', admin: 'Ubuyobozi', mission: 'Intego yacu', 
+    see_campaigns: 'Reba ibikorwa', find_services: 'Shakisha serivisi', 
+    book_visit: 'Teganya gusura', search_facilities: 'Shakisha serivisi', 
+    upcoming: 'Ibiri imbere',
+    mission_text: 'Tanga amakuru yizewe ku buzima, menyesha ibikorwa byo gukangurira abaturage, wereka ahari serivisi z\'ubuzima no gufasha mu guteganya indwara — muri interineti cyangwa ahandi.',
+    app_install: 'Shyiramo App',
+    notifications: 'Amatangazo',
+    lang_rw: 'Kinyarwanda',
+    lang_en: 'Icyongereza'
+  }
+};
+
+let lang = localStorage.getItem('lang') || 'en';
+const applyLang = () => {
+  document.querySelectorAll('[data-i18n]').forEach(n => {
+    n.textContent = I18N[lang][n.dataset.i18n] || n.textContent;
+  });
+  
+  // Update mission text specifically
+  document.getElementById('missionText').textContent = I18N[lang].mission_text;
+  
+  // Update button texts
+  if (document.getElementById('installBtn')) {
+    document.getElementById('installBtn').textContent = ` ${I18N[lang].app_install}`;
+  }
+  if (document.getElementById('notifyBtn')) {
+    document.getElementById('notifyBtn').textContent = ` ${I18N[lang].notifications}`;
+  }
+  
+  // Update language toggle display
+  document.getElementById('langFlag').textContent = lang === 'en' ? '' : '';
+  document.getElementById('langText').textContent = lang === 'en' ? 'RW/EN' : 'EN/RW';
+};
+
+const langToggle = document.getElementById('langToggle');
+langToggle.onclick = () => {
+  lang = lang === 'en' ? 'rw' : 'en';
+  localStorage.setItem('lang', lang);
+  showToast(lang === 'en' ? 'Language set to English' : 'Ururimi rwahinduwe Ikinyarwanda', 'success');
+  applyLang();
+};
+
+/********************
+ * Enhanced Theme Switching
+ ********************/ 
+const themeToggle = document.getElementById('themeToggle');
+const currentTheme = localStorage.getItem('theme') || 'dark';
+
+// Set initial theme
+if (currentTheme === 'light') {
+  document.body.setAttribute('data-theme', 'light');
+  themeToggle.checked = false;
+} else {
+  document.body.setAttribute('data-theme', 'dark');
+  themeToggle.checked = true;
+}
+
+themeToggle.onchange = e => {
+  if (e.target.checked) {
+    document.body.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+    showToast('Dark mode enabled', 'info');
+  } else {
+    document.body.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+    showToast('Light mode enabled', 'info');
+  }
+};
+
+/********************
+ * Toast Notifications
+ ********************/ 
+function showToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // Add appropriate icon based on type
+  let icon = '';
+  if (type === 'success') icon = '';
+  if (type === 'error') icon = '';
+  if (type === 'info') icon = 'ℹ';
+  
+  toast.innerHTML = `${icon} ${message}`;
+  toastContainer.appendChild(toast);
+  
+  // Remove toast after 3 seconds
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+/********************
+ * Enhanced PWA Support
+ ********************/ 
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+const pwaPrompt = document.getElementById('pwaPrompt');
+const pwaInstall = document.getElementById('pwaInstall');
+const pwaDismiss = document.getElementById('pwaDismiss');
+
+// Listen for beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show custom install prompt
+  pwaPrompt.hidden = false;
+  
+  // Also show the install button in header
+  installBtn.hidden = false;
+});
+
+// Handle install button click
+pwaInstall.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  
+  if (outcome === 'accepted') {
+    showToast('App installed successfully!', 'success');
+    installBtn.hidden = true;
+    pwaPrompt.hidden = true;
+  }
+  
+  deferredPrompt = null;
+});
+
+// Handle dismiss button
+pwaDismiss.addEventListener('click', () => {
+  pwaPrompt.hidden = true;
+});
+
+// Handle direct install button click
+installBtn.onclick = () => {
+  pwaPrompt.hidden = false;
+};
+
+// Listen for app installed event
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  installBtn.hidden = true;
+  pwaPrompt.hidden = true;
+});
+
+/********************
+ * Offline Detection
+ ********************/ 
+const offlineIndicator = document.getElementById('offlineIndicator');
+
+window.addEventListener('online', () => {
+  offlineIndicator.style.display = 'none';
+  showToast('Connection restored', 'success');
+});
+
+window.addEventListener('offline', () => {
+  offlineIndicator.style.display = 'block';
+  showToast('You are offline', 'info');
+});
+
+// Check initial status
+if (!navigator.onLine) {
+  offlineIndicator.style.display = 'block';
+}
+
+/********************
+ * Service Worker Registration
+ ********************/ 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Create a service worker with more comprehensive caching
+    const swCode = `
+      const CACHE_NAME = 'rh-cache-v2';
+      const urlsToCache = [
+        './',
+        // Add other assets you want to cache
+      ];
+      
+      self.addEventListener('install', event => {
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+        );
+      });
+      
+      self.addEventListener('fetch', event => {
+        event.respondWith(
+          caches.match(event.request)
+            .then(response => {
+              if (response) {
+                return response;
+              }
+              
+              return fetch(event.request).then(response => {
+                if (!response || response.status !== 200 || response.type !== 'basic') {
+                  return response;
+                }
+                
+                const responseToCache = response.clone();
+                
+                caches.open(CACHE_NAME)
+                  .then(cache => {
+                    cache.put(event.request, responseToCache);
+                  });
+                  
+                return response;
+              });
+            })
+        );
+      });
+    `;
+    
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    
+    navigator.serviceWorker.register(url)
+      .then(registration => {
+        console.log('SW registered: ', registration);
+      })
+      .catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
+/********************
+ * State & seed data
+ ********************/ 
+const LS = {
+  facilities: 'rh_facilities', campaigns:'rh_campaigns', appts:'rh_appts', reminders:'rh_reminders', chat:'rh_chat', config:'rh_config'
+};
+const seedFacilities = [
+ {name:'Kacyiru District Hospital', district:'Gasabo', services:['Emergency','Maternity','Immunization'], phone:'+250788000001', open:true},
+ {name:'Kibagabaga Hospital', district:'Gasabo', services:['NCD Clinic','Imaging','Maternity'], phone:'+250788000002', open:true},
+ {name:'Muhima Hospital', district:'Nyarugenge', services:['Maternity','Pediatrics','HPV Screening'], phone:'+250788000003', open:false},
+ {name:'Masaka Hospital', district:'Kicukiro', services:['Surgery','Immunization','OPD'], phone:'+250788000004', open:true}
+];
+const seedCampaigns = [
+ {title:'HPV Screening Week', date: offsetDate(7), cat:'Immunization', desc:'Free cervical cancer screening & HPV information.'},
+ {title:'Healthy Heart Check', date: offsetDate(14), cat:'NCD', desc:'Blood pressure & glucose screening.'},
+ {title:'World Mental Health Day', date: '2025-10-10', cat:'Mental Health', desc:'Community talks and counseling.'}
+];
+function offsetDate(d){const dt=new Date(); dt.setDate(dt.getDate()+d); return dt.toISOString().slice(0,10)}
+const cfg = JSON.parse(localStorage.getItem(LS.config)||'{}');
+
+/********************
+ * Tabs
+ ********************/ 
+function selectTab(id){ 
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== id);
+}
+window.selectTab = selectTab;
+
+/********************
+ * Facilities
+ ********************/ 
+function getFacilities(){return JSON.parse(localStorage.getItem(LS.facilities)||'null')||seedFacilities}
+function setFacilities(arr){localStorage.setItem(LS.facilities, JSON.stringify(arr))}
+function renderFacilities(){
+  const wrap=document.getElementById('facilityList');
+  const qd=(document.getElementById('fDistrict').value||'').toLowerCase();
+  const qs=(document.getElementById('fType').value||'').toLowerCase();
+  const qo=document.getElementById('fOpen').value;
+  const data=getFacilities().filter(x=>(!qd||x.district.toLowerCase().includes(qd))&&(!qs||x.services.join(',').toLowerCase().includes(qs))&&(qo==='any'||(qo==='yes'?x.open:!x.open)));
+  wrap.innerHTML = data.map(x=>`
+    <div class="item">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div><strong>${x.name}</strong> <span class="tag">${x.district}</span></div>
+        <div>${x.open?'<span class="ok"> Open</span>':'<span class="danger"> Closed</span>'}</div>
+      </div>
+      <div class="muted">${x.services.join(', ')}</div>
+      <div class="chips" style="margin-top:6px">
+        <a class="btn" href="tel:${x.phone}"> Call</a>
+        <button class="btn" onclick="prefillAppt('${x.name}')"> Book</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('kpiFacilities').textContent = data.length;
+}
+function resetFacilities(){['fDistrict','fType'].forEach(id=>document.getElementById(id).value=''); document.getElementById('fOpen').value='any'; renderFacilities()}
+function addFacility(){
+  const n=document.getElementById('newName').value.trim();
+  const d=document.getElementById('newDistrict').value.trim();
+  const s=document.getElementById('newServices').value.split(',').map(v=>v.trim()).filter(Boolean);
+  const p=document.getElementById('newPhone').value.trim();
+  if(!n||!d||!s.length){alert('Please fill name, district, services.');return}
+  const arr=getFacilities(); arr.push({name:n,district:d,services:s,phone:p,open:true}); setFacilities(arr); renderFacilities(); ['newName','newDistrict','newServices','newPhone'].forEach(id=>document.getElementById(id).value='')
+}
+function prefillAppt(name){selectTab('appointments'); document.getElementById('aFacility').value=name}
+function searchFacilities(){ document.getElementById('fDistrict').value=document.getElementById('qDistrict').value; document.getElementById('fType').value=document.getElementById('qService').value; renderFacilities(); const list=document.getElementById('facilityList'); const res=document.getElementById('searchResults'); res.innerHTML=list.innerHTML.split('</div>').slice(0,2).join('</div>') }
+
+/********************
+ * Campaigns
+ ********************/ 
+function getCampaigns(){return JSON.parse(localStorage.getItem(LS.campaigns)||'null')||seedCampaigns}
+function setCampaigns(arr){localStorage.setItem(LS.campaigns, JSON.stringify(arr))}
+function addCampaign(){ const t=val('cTitle'), d=val('cDate'), c=val('cCat'), ds=val('cDesc'); if(!t||!d){alert('Add title and date.');return} const arr=getCampaigns(); arr.push({title:t,date:d,cat:c,desc:ds}); setCampaigns(arr); renderCampaigns(); ['cTitle','cDate','cCat','cDesc'].forEach(id=>document.getElementById(id).value='')}
+function renderCampaigns(){ const rows=document.getElementById('campaignRows'); const arr=[...getCampaigns()].sort((a,b)=>a.date.localeCompare(b.date)); rows.innerHTML = arr.map((x,i)=>`<tr><td>${x.date}</td><td><strong>${x.title}</strong><div class='muted'>${x.desc||''}</div></td><td>${x.cat||''}</td><td class='right'><button class='btn' title='Reminder' onclick='scheduleReminder(${i})'></button> <button class='btn' onclick='delCampaign(${i})'></button></td></tr>`).join(''); document.getElementById('campaignEmpty').hidden = arr.length>0; document.getElementById('kpiCampaigns').textContent = arr.length; renderUpcoming() }
+function delCampaign(i){const arr=getCampaigns(); arr.splice(i,1); setCampaigns(arr); renderCampaigns();}
+function renderUpcoming(){ const list=document.getElementById('upcomingList'); const soon=[...getCampaigns()].filter(x=>new Date(x.date)>=new Date()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4); list.innerHTML= soon.map(x=>`<div class='item'><strong>${x.title}</strong><div class='muted'>${x.date} · ${x.cat||''}</div></div>`).join('') }
+async function importMoh(){ const url=prompt('Enter MOH/NHIC JSON URL (CORS must allow browser access):', cfg.mohUrl||''); if(!url) return; document.getElementById('mohUrl').value=url; await testFetch(); saveConfig(); }
+
+/********************
+ * Education
+ ********************/ 
+const modules=[
+ {id:'ncd', title:'Preventing NCDs', content:'Stay active, reduce salt & sugar, avoid tobacco, check BP & glucose regularly.', tips:['30 min brisk walk/day','Eat fruits & veg daily','Know your numbers: BP < 140/90']},
+ {id:'hpv', title:'Cervical cancer & HPV', content:'HPV vaccine protects. Screening finds changes early.', tips:['Girls 12–15 yrs: vaccinate','Screening for eligible women','Seek care for unusual bleeding']},
+ {id:'mh', title:'Mental health basics', content:'Stress is common—talk to someone you trust. Seek help early.', tips:['Sleep 7–8 hrs','Limit alcohol','Call your provider if symptoms persist']}
+];
+const quizQs=[
+ {q:'High blood pressure often has no symptoms. True or false?', a:['True','False'], correct:0},
+ {q:'HPV vaccination helps prevent cervical cancer.', a:['Yes','No'], correct:0},
+ {q:'Which habit best supports mental health?', a:['Total isolation','Regular sleep'], correct:1}
+];
+function renderEducation(){ const list=document.getElementById('eduList'); list.innerHTML = modules.map(m=>`<div class='item'><strong>${m.title}</strong><div class='muted'>${m.content}</div><div class='chips' style='margin-top:6px'>${m.tips.map(t=>`<span class='chip'>${t}</span>`).join('')}</div></div>`).join(''); const q=document.getElementById('quiz'); q.innerHTML = quizQs.map((x,i)=>`<div class='item'><div><strong>Q${i+1}.</strong> ${x.q}</div>${x.a.map((o,j)=>`<label><input type='radio' name='q${i}' value='${j}'> ${o}</label>`).join('<br>')}</div>`).join('') }
+function gradeQuiz(){ let score=0; quizQs.forEach((x,i)=>{ const v=document.querySelector(`input[name=q${i}]:checked`); if(v&&+v.value===x.correct) score++}); const out=document.getElementById('quizScore'); out.textContent=`${score}/${quizQs.length}`; out.style.borderColor = score===quizQs.length? '#2b8a3e':'#294055' }
+
+/********************
+ * Appointments
+ ********************/ 
+function getAppts(){return JSON.parse(localStorage.getItem(LS.appts)||'[]')}
+function setAppts(a){localStorage.setItem(LS.appts, JSON.stringify(a))}
+function saveAppointment(){ const a={name:val('aName'), phone:val('aPhone'), facility:val('aFacility'), date:val('aDate'), time:val('aTime'), reason:val('aReason')}; if(!a.name||!a.phone||!a.date||!a.time){alert('Fill name, phone, date, and time.');return} const arr=getAppts(); arr.push(a); setAppts(arr); renderAppts(); ['aName','aPhone','aReason'].forEach(id=>document.getElementById(id).value='') }
+function renderAppts(){ const list=document.getElementById('apptList'); const arr=[...getAppts()].sort((a,b)=>(`${a.date} ${a.time}`).localeCompare(`${b.date} ${b.time}`)); list.innerHTML = arr.map((x,i)=>`<div class='item'><div style='display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap'><div><strong>${x.name}</strong> · ${x.phone}</div><div class='muted'>${x.date} ${x.time}</div></div><div class='muted'>${x.facility||''} — ${x.reason||''}</div><div class='right' style='gap:8px'><button class='btn' onclick='remindAppt(${i})'></button><button class='btn' onclick='delAppt(${i})'></button></div></div>`).join(''); document.getElementById('kpiAppts').textContent = arr.length }
+function delAppt(i){const arr=getAppts(); arr.splice(i,1); setAppts(arr); renderAppts()}
+function exportAppointments(){ downloadCSV(getAppts(),'appointments.csv') }
+function exportFacilities(){ downloadCSV(getFacilities(),'facilities.csv') }
+function remindAppt(i){ const a=getAppts()[i]; notifyAt(`${a.name} – appointment`, `${a.date} ${a.time} at ${a.facility||'facility'}`) }
+
+/********************
+ * Telehealth demo
+ ********************/ 
+let stream=null; const video=document.getElementById('preview');
+async function startCamera(){ try{ stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false}); video.srcObject=stream }catch(e){ alert('Camera error: '+e.message) }}
+function stopCamera(){ if(stream) stream.getTracks().forEach(t=>t.stop()); video.srcObject=null }
+function captureFrame(){ if(!video.srcObject){alert('Start camera first.');return} const c=document.createElement('canvas'); c.width=video.videoWidth; c.height=video.videoHeight; const ctx=c.getContext('2d'); ctx.drawImage(video,0,0); c.toBlob(b=>{ const url=URL.createObjectURL(b); const a=document.getElementById('capturedLink'); a.href=url; a.download='triage_note.png'; a.hidden=false },'image/png') }
+
+/********************
+ * Chat (local)
+ ********************/ 
+function getChat(){return JSON.parse(localStorage.getItem(LS.chat)||'[]')}
+function setChat(x){localStorage.setItem(LS.chat, JSON.stringify(x))}
+function sendChat(){ const msg=val('chatMsg'); if(!msg) return; const arr=getChat(); arr.push({me:true, t:Date.now(), text:msg}); // simple rule-based reply
+  const reply = suggestReply(msg);
+  if(reply){ arr.push({me:false, t:Date.now()+500, text:reply}) }
+  setChat(arr); renderChat(); document.getElementById('chatMsg').value=''}
+function renderChat(){ const box=document.getElementById('chatBox'); const arr=getChat(); box.innerHTML=arr.map(m=>`<div class='item' style='${m.me?'border-color:#2a705c;background:#0c1716':''}'><div class='muted' style='font-size:12px'>${new Date(m.t).toLocaleString()}</div>${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight }
+function suggestReply(msg){ msg=msg.toLowerCase(); if(msg.includes('fever')) return 'If fever ≥38°C for 2+ days or severe symptoms, seek care. Stay hydrated.'; if(msg.includes('bp')||msg.includes('pressure')) return 'Check BP at clinic. Normal is usually below 140/90 for adults.'; if(msg.includes('preg')) return 'Antenatal visits are important. Consider booking with Maternity clinic near you.'; return '' }
+
+/********************
+ * Notifications & Reminders
+ ********************/ 
+const notifyBtn=document.getElementById('notifyBtn');
+notifyBtn.onclick=async()=>{ try{ const p=await Notification.requestPermission(); showToast('Notification permission: '+p, 'info') }catch(e){ showToast('Notifications not supported', 'error') } };
+function scheduleReminder(i){ const c=getCampaigns()[i]; notifyAt(c.title, `${c.date} · ${c.cat||''}`); const r=getReminders(); r.push({t:Date.now(), what:`Campaign: ${c.title}`}); setReminders(r); renderReminders() }
+function getReminders(){return JSON.parse(localStorage.getItem(LS.reminders)||'[]')}
+function setReminders(x){localStorage.setItem(LS.reminders, JSON.stringify(x))}
+function renderReminders(){ const list=document.getElementById('reminderList'); const r=getReminders(); list.innerHTML=r.map(x=>`<div class='item'>${x.what} <span class='muted' style='float:right'>${new Date(x.t).toLocaleString()}</span></div>`).join(''); document.getElementById('kpiReminders').textContent=r.length }
+function notifyAt(title, body){ if('Notification' in window && Notification.permission==='granted'){ new Notification(title,{body, icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 128 128\'%3E%3Cpath fill=\'%23fff\' d=\'M0 0h128v128H0z\'/%3E%3Cpath fill=\'%23008066\' d=\'M14 14h100v100H14z\'/%3E%3Cpath fill=\'%23fff\' d=\'M57 25h14v78H57zM25 57h78v14H25z\'/%3E%3C/svg%3E'}); } else { showToast(`${title}\n${body}`, 'info') } }
+
+/********************
+ * Config & fetch
+ ********************/ 
+function saveConfig(){ const url=val('mohUrl'); localStorage.setItem(LS.config, JSON.stringify({...cfg, mohUrl:url})); showToast('Configuration saved', 'success') }
+async function testFetch(){ const url=val('mohUrl'); const log=document.getElementById('fetchLog'); log.textContent='Fetching…'; try{ const res=await fetch(url); const json=await res.json(); log.textContent=JSON.stringify(json,null,2); if(Array.isArray(json)){ const arr=getCampaigns().concat(json.map(x=>({title:x.title||x.name||'Campaign', date:x.date||x.when||new Date().toISOString().slice(0,10), cat:x.category||'', desc:x.desc||x.description||''}))); setCampaigns(arr); renderCampaigns(); showToast('Data imported successfully', 'success'); }
+  }catch(e){ log.textContent='Error: '+e.message+'\nTip: The URL must allow CORS in browsers.'; showToast('Failed to fetch data: ' + e.message, 'error'); }
+}
+
+/********************
+ * CSV backup/restore
+ ********************/ 
+function downloadCSV(rows, filename){ if(!rows||!rows.length){alert('Nothing to export.');return} const keys=Object.keys(rows[0]); const csv=[keys.join(','), ...rows.map(r=>keys.map(k=>`"${(r[k]??'').toString().replaceAll('"','""')}"`).join(','))].join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click() }
+function backupData(){ const data={ facilities:getFacilities(), campaigns:getCampaigns(), appts:getAppts(), reminders:getReminders(), chat:getChat(), config: JSON.parse(localStorage.getItem(LS.config)||'{}')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='rwanda-health-hub-backup.json'; a.click(); showToast('Backup created successfully', 'success') }
+function restoreData(ev){ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const j=JSON.parse(r.result); if(j.facilities) setFacilities(j.facilities); if(j.campaigns) setCampaigns(j.campaigns); if(j.appts) setAppts(j.appts); if(j.reminders) setReminders(j.reminders); if(j.chat) setChat(j.chat); if(j.config) localStorage.setItem(LS.config, JSON.stringify(j.config)); renderAll(); showToast('Data restored successfully', 'success'); }catch(e){ showToast('Invalid backup file: ' + e.message, 'error') } }; r.readAsText(f) }
+
+/********************
+ * Helpers & boot
+ ********************/ 
+function val(id){return (document.getElementById(id)?.value||'').trim()}
+function renderAll(){ renderFacilities(); renderCampaigns(); renderEducation(); renderAppts(); renderChat(); renderReminders(); }
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+  applyLang();
+  renderAll();
+});
+</script>
+</body>
+</html>
