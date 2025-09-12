@@ -1,0 +1,592 @@
+
+      <div class="appointment-card">
+        <div class="appointment-header">
+          <div class="appointment-name"></div>
+          <div class="appointment-date"></div>
+        </div>
+        <div class="appointment-details">
+          <strong>⏰ Time:</strong> ............<br>
+          <strong>🏥 Facility:</strong> ............<br>
+          <strong>📞 Phone:</strong> .............<br><strong>📧 Email:</strong> ................<br><strong>🩺 Service:</strong> ................<br><strong>📝 Notes:</strong> ..............
+          <br><span class="${statusClass}"><strong></strong></span>
+        </div>
+        <div class="appointment-actions">
+          <button class="btn pdf-download-btn btn-small" onclick="downloadAppointmentPDF(${index})">
+            📄 Download PDF
+          </button>
+          <button class="btn btn-small" onclick="remindAppt(${index})" title="Set reminder">
+            🔔 Remind
+          </button>
+          <button class="btn btn-small" onclick="rescheduleAppt(${index})" style="background: linear-gradient(135deg, var(--warn), #f59e0b);">
+            📅 Reschedule
+          </button>
+          <button class="btn btn-small" onclick="cancelAppt(${index})" style="background: linear-gradient(135deg, var(--danger), #dc2626);">
+            ❌ Cancel
+          </button>
+        </div>
+      </div>
+   
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppointmentPro - Book Your Appointment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .booking-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .appointments-list {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .appointment-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .appointment-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        .appointment-date {
+            color: #6366f1;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .appointment-details {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .success-message.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .booking-form, .appointments-list {
+                padding: 1.5rem;
+            }
+        }
+
+        .floating-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 50%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>AppointmentPro</h1>
+            <p>Schedule your appointments with ease and download confirmations instantly</p>
+        </header>
+
+        <div class="main-content">
+            <div class="booking-form">
+                <h2 style="margin-bottom: 1.5rem; color: #1e293b; font-size: 1.8rem;">Book New Appointment</h2>
+                
+                <div id="successMessage" class="success-message">
+                    Appointment booked successfully! 🎉
+                </div>
+
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label for="clientName">Full Name</label>
+                        <input type="text" id="clientName" name="clientName" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="service">Service Type</label>
+                        <select id="service" name="service" required>
+                            <option value="">Select a service</option>
+                            <option value="consultation">Consultation</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="treatment">Treatment</option>
+                            <option value="assessment">Assessment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Appointment Date</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time">Appointment Time</label>
+                        <select id="time" name="time" required>
+                            <option value="">Select time</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="09:30">9:30 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="10:30">10:30 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="11:30">11:30 AM</option>
+                            <option value="13:00">1:00 PM</option>
+                            <option value="13:30">1:30 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="14:30">2:30 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="15:30">3:30 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="16:30">4:30 PM</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Notes</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Any special requirements or notes..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">Book Appointment</button>
+                </form>
+            </div>
+
+            <div class="appointments-list">
+                <h2 style="margin-bottom: 1.5rem; color: #1e293b; font-size: 1.8rem;">Your Appointments</h2>
+                <div id="appointmentsList">
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4l6 6m-6 0l6-6"></path>
+                        </svg>
+                        <p>No appointments scheduled yet.<br>Book your first appointment!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appointments = [];
+        let appointmentIdCounter = 1;
+
+        // Set minimum date to today
+        document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const appointment = {
+                id: appointmentIdCounter++,
+                clientName: formData.get('clientName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                service: formData.get('service'),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                notes: formData.get('notes'),
+                createdAt: new Date().toISOString()
+            };
+
+            appointments.push(appointment);
+            renderAppointments();
+            showSuccessMessage();
+            this.reset();
+        });
+
+        function renderAppointments() {
+            const container = document.getElementById('appointmentsList');
+            
+            if (appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4l6 6m-6 0l6-6"></path>
+                        </svg>
+                        <p>No appointments scheduled yet.<br>Book your first appointment!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const appointmentsHtml = appointments.map(appointment => {
+                const date = new Date(appointment.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+
+                return `
+                    <div class="appointment-card">
+                        <div class="appointment-header">
+                            <div class="appointment-name">${appointment.clientName}</div>
+                            <div class="appointment-date">${formattedDate} at ${formatTime(appointment.time)}</div>
+                        </div>
+                        <div class="appointment-details">
+                            <strong>Service:</strong> ${capitalizeFirst(appointment.service)}<br>
+                            <strong>Email:</strong> ${appointment.email}<br>
+                            <strong>Phone:</strong> ${appointment.phone}
+                            ${appointment.notes ? `<br><strong>Notes:</strong> ${appointment.notes}` : ''}
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-secondary btn-small" onclick="downloadPDF(${appointment.id})">
+                                Download PDF
+                            </button>
+                            <button class="btn btn-small" onclick="deleteAppointment(${appointment.id})" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = appointmentsHtml;
+        }
+
+        function formatTime(time) {
+            const [hour, minute] = time.split(':');
+            const hour12 = hour > 12 ? hour - 12 : hour;
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            return `${hour12}:${minute} ${ampm}`;
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function showSuccessMessage() {
+            const message = document.getElementById('successMessage');
+            message.classList.add('show');
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 3000);
+        }
+
+        function deleteAppointment(id) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                appointments = appointments.filter(apt => apt.id !== id);
+                renderAppointments();
+            }
+        }
+
+        function downloadPDF(appointmentId) {
+            const appointment = appointments.find(apt => apt.id === appointmentId);
+            if (!appointment) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Set up colors and fonts
+            doc.setFont('helvetica');
+            
+            // Header
+            doc.setFillColor(79, 70, 229);
+            doc.rect(0, 0, 210, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.text('AppointmentPro', 20, 25);
+            
+            doc.setFontSize(12);
+            doc.text('Appointment Confirmation', 20, 35);
+
+            // Reset color for body
+            doc.setTextColor(0, 0, 0);
+            
+            // Appointment details
+            let yPos = 60;
+            
+            doc.setFontSize(18);
+            doc.text('Appointment Details', 20, yPos);
+            
+            yPos += 15;
+            doc.setFontSize(12);
+            
+            const details = [
+                ['Confirmation ID:', `APT-${appointment.id.toString().padStart(4, '0')}`],
+                ['Client Name:', appointment.clientName],
+                ['Email:', appointment.email],
+                ['Phone:', appointment.phone],
+                ['Service:', capitalizeFirst(appointment.service)],
+                ['Date:', new Date(appointment.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })],
+                ['Time:', formatTime(appointment.time)],
+                ['Booked on:', new Date(appointment.createdAt).toLocaleDateString('en-US')]
+            ];
+
+            details.forEach(([label, value]) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, 20, yPos);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value, 80, yPos);
+                yPos += 10;
+            });
+
+            if (appointment.notes) {
+                yPos += 5;
+                doc.setFont('helvetica', 'bold');
+                doc.text('Additional Notes:', 20, yPos);
+                yPos += 8;
+                doc.setFont('helvetica', 'normal');
+                const splitNotes = doc.splitTextToSize(appointment.notes, 170);
+                doc.text(splitNotes, 20, yPos);
+                yPos += splitNotes.length * 5;
+            }
+
+            // Footer
+            yPos += 20;
+            doc.setDrawColor(79, 70, 229);
+            doc.line(20, yPos, 190, yPos);
+            
+            yPos += 10;
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Please arrive 15 minutes before your scheduled appointment time.', 20, yPos);
+            doc.text('For any changes or cancellations, please contact us at least 24 hours in advance.', 20, yPos + 5);
+            doc.text('Thank you for choosing AppointmentPro!', 20, yPos + 15);
+
+            // Save the PDF
+            const fileName = `appointment-${appointment.clientName.replace(/\s+/g, '-')}-${appointment.date}.pdf`;
+            doc.save(fileName);
+        }
+
+        // Initialize
+        renderAppointments();
+    </script>
+</body>
+</html>
